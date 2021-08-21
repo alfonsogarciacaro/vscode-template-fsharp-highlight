@@ -1,6 +1,6 @@
 {
 	"scopeName": "template.fsharp.reinjection",
-	"injectionSelector": "L:source.fsharp (template.fsharp.html, template.fsharp.css, template.fsharp.sql) - template.fsharp.substitution",
+	"injectionSelector": "L:source.fsharp (template.fsharp.html, template.fsharp.sql) - template.fsharp.substitution",
 	"patterns": [
 		{
 			"contentName": "template.fsharp.substitution",

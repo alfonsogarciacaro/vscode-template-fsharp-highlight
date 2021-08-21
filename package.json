@@ -1,8 +1,8 @@
 {
   "name": "vscode-template-fsharp-highlight",
-  "displayName": "Highlight HTML/CSS/SQL templates in F#",
+  "displayName": "Highlight HTML/SQL templates in F#",
   "description": "Syntax highlighting for template strings in F#",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "alfonsogarciacaro",  
   "license": "MIT",
   "repository": {
@@ -24,20 +24,14 @@
           "source.fsharp"
         ],
         "scopeName": "template.fsharp.injection",
-        "path": "./syntaxes/grammar.json",
-        "embeddedLanguages": {
-          "template.fsharp.html": "html"
-        }
+        "path": "./syntaxes/grammar.json"
       },
       {
         "injectTo": [
           "source.fsharp"
         ],
         "scopeName": "template.fsharp.reinjection",
-        "path": "./syntaxes/reinject-grammar.json",
-        "embeddedLanguages": {
-          "template.fsharp.substitution": "fsharp"
-        }
+        "path": "./syntaxes/reinject-grammar.json"
       }
     ]
   },
