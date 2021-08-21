@@ -1,0 +1,52 @@
+{
+	"scopeName": "template.fsharp.injection",
+	"injectionSelector": "L:source.fsharp - comment",
+	"patterns": [
+		{
+            "begin": "[ .](?=(html|svg|css|sql)\\s+\\$\"{3})",
+			"end": "\"{3}",
+            "beginCaptures": {
+                "1": {
+                    "name": "variable.fsharp"
+                }
+			},
+			"patterns": [
+				{
+					"include": "#html_template"
+				},
+				{
+					"include": "#css_template"
+				},
+				{
+					"include": "#sql_template"
+				}
+			]
+		}
+	],
+	"repository": {
+		"html_template": {
+			"contentName": "template.fsharp.html",
+            "begin": "(html|svg)\\s+\\$\"{3}",
+			"end": "(?=\"{3})",
+			"patterns": [{
+				"include": "text.html.derivative"
+			}]	
+		},
+		"css_template": {
+			"contentName": "template.fsharp.css",
+            "begin": "css\\s+\\$\"{3}",
+			"end": "(?=\"{3})",
+			"patterns": [{
+				"include": "source.css"
+			}]
+		},
+		"sql_template": {
+			"contentName": "template.fsharp.sql",
+            "begin": "sql\\s+\\$\"{3}",
+			"end": "(?=\"{3})",
+			"patterns": [{
+				"include": "source.sql"
+			}]
+		}
+	}
+}
