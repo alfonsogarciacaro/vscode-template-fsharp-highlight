@@ -3,51 +3,60 @@
 	"injectionSelector": "L:source.fsharp - comment",
 	"patterns": [
 		{
-            "begin": "\\b(html|svg)\\b",
+			"begin": "[ ._](html|svg) *(?:(?=\\$)|$)",
 			"end": "(?:^|[^$])\"{3}",
-            "beginCaptures": {
-                "1": {
-                    "name": "variable.fsharp"
-                }
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
 			},
 			"patterns": [
 				{
 					"include": "#html_template"
+				},
+				{
+					"include": "source.fsharp"
 				}
 			]
 		},
 		{
-            "begin": "\\bsql\\b",
+			"begin": "[ ._](sql) *(?:(?=\\$)|$)",
 			"end": "(?:^|[^$])\"{3}",
-            "beginCaptures": {
-                "1": {
-                    "name": "variable.fsharp"
-                }
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
 			},
 			"patterns": [
 				{
 					"include": "#sql_template"
+				},
+				{
+					"include": "source.fsharp"
 				}
 			]
 		}
-
 	],
 	"repository": {
 		"html_template": {
 			"contentName": "template.fsharp.html",
-            "begin": "\\$\"{3}",
+			"begin": "\\$\"{3}",
 			"end": "(?=(?:^|[^$])\"{3})",
-			"patterns": [{
-				"include": "text.html.derivative"
-			}]
+			"patterns": [
+				{
+					"include": "text.html.derivative"
+				}
+			]
 		},
 		"sql_template": {
 			"contentName": "template.fsharp.html",
-            "begin": "\\$\"{3}",
+			"begin": "\\$\"{3}",
 			"end": "(?=(?:^|[^$])\"{3})",
-			"patterns": [{
-				"include": "source.sql"
-			}]
+			"patterns": [
+				{
+					"include": "source.sql"
+				}
+			]
 		}
 	}
 }
