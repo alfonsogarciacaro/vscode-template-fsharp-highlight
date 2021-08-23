@@ -17,3 +17,5 @@ If you just want to trigger highlighting, use an identity function:
 ```fsharp
 let svg (s: string) = s
 ```
+
+![Example](screenshot.png)

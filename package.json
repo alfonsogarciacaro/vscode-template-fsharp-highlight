@@ -2,7 +2,8 @@
   "name": "vscode-template-fsharp-highlight",
   "displayName": "Highlight HTML/SQL templates in F#",
   "description": "Syntax highlighting for template strings in F#",
-  "version": "0.0.2",
+  "icon": "fsharp.png",
+  "version": "0.0.3",
   "publisher": "alfonsogarciacaro",  
   "license": "MIT",
   "repository": {
