@@ -1,10 +1,10 @@
 {
 	"scopeName": "template.fsharp.injection",
-	"injectionSelector": "L:source.fsharp - comment",
+	"injectionSelector": "L:source.fsharp - (comment, string.quoted.double.fsharp, string.quoted.triple.fsharp)",
 	"patterns": [
 		{
 			"begin": "[ ._](html|svg) *(?:(?=\\$)|$)",
-			"end": "(?:^|[^$])\"{3}",
+			"end": "\"{3}",
 			"beginCaptures": {
 				"1": {
 					"name": "variable.fsharp"
@@ -21,7 +21,7 @@
 		},
 		{
 			"begin": "[ ._](sql) *(?:(?=\\$)|$)",
-			"end": "(?:^|[^$])\"{3}",
+			"end": "\"{3}",
 			"beginCaptures": {
 				"1": {
 					"name": "variable.fsharp"
@@ -41,7 +41,7 @@
 		"html_template": {
 			"contentName": "template.fsharp.html",
 			"begin": "\\$\"{3}",
-			"end": "(?=(?:^|[^$])\"{3})",
+			"end": "(?=\"{3})",
 			"patterns": [
 				{
 					"include": "text.html.derivative"
@@ -49,9 +49,9 @@
 			]
 		},
 		"sql_template": {
-			"contentName": "template.fsharp.html",
+			"contentName": "template.fsharp.sql",
 			"begin": "\\$\"{3}",
-			"end": "(?=(?:^|[^$])\"{3})",
+			"end": "(?=\"{3})",
 			"patterns": [
 				{
 					"include": "source.sql"
