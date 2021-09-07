@@ -39,7 +39,7 @@
 	],
 	"repository": {
 		"html_template": {
-			"contentName": "template.fsharp.html",
+			"contentName": "meta.embedded.template.html",
 			"begin": "\\$\"{3}",
 			"end": "(?=\"{3})",
 			"patterns": [
@@ -49,7 +49,7 @@
 			]
 		},
 		"sql_template": {
-			"contentName": "template.fsharp.sql",
+			"contentName": "meta.embedded.template.sql",
 			"begin": "\\$\"{3}",
 			"end": "(?=\"{3})",
 			"patterns": [
