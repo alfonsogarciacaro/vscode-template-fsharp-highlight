@@ -12,12 +12,16 @@
   "bugs": {
       "url": "https://github.com/alfonsogarciacaro/vscode-template-fsharp-highlight/issues"
   },
-  "engines": {
-    "vscode": "^1.8.0"
-  },
+	"engines": {
+		"vscode": "^1.43.0"
+	},
   "categories": [
     "Other"
   ],
+	"activationEvents": [
+		"onLanguage:fsharp"
+	],  
+  "main": "./out/extension",
   "contributes": {
     "grammars": [
       {
@@ -28,7 +32,8 @@
         "path": "./syntaxes/grammar.json",
         "embeddedLanguages": {
           "meta.embedded.template.html": "html",
-          "meta.embedded.template.sql": "sql"
+          "meta.embedded.template.sql": "sql",
+          "meta.embedded.template.css": "css"
         }
       },
       {
@@ -43,5 +48,15 @@
       }
     ]
   },
-  "dependencies": {}
+	"scripts": {
+    "compile": "tsc -b",
+		"watch": "tsc -b -w"
+	},
+	"dependencies": {
+	},
+	"devDependencies": {
+    "@types/node": "^16.7.13",
+		"@types/vscode": "^1.43.0",
+    "typescript": "^4.2.2"
+	}
 }

@@ -35,7 +35,25 @@
 					"include": "source.fsharp"
 				}
 			]
+		},
+		{
+			"begin": "[ ._](css) *(?:(?=\\$)|$)",
+			"end": "\"{3}",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#css_template"
+				},
+				{
+					"include": "source.fsharp"
+				}
+			]
 		}
+
 	],
 	"repository": {
 		"html_template": {
@@ -55,6 +73,16 @@
 			"patterns": [
 				{
 					"include": "source.sql"
+				}
+			]
+		},
+		"css_template": {
+			"contentName": "meta.embedded.template.css",
+			"begin": "\\$\"{3}",
+			"end": "(?=\"{3})",
+			"patterns": [
+				{
+					"include": "source.css"
 				}
 			]
 		}

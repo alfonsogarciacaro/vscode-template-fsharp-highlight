@@ -1,11 +1,11 @@
 {
 	"scopeName": "template.fsharp.reinjection",
-	"injectionSelector": "L:source.fsharp (meta.embedded.template.html, meta.embedded.template.sql) - meta.embedded.template.substitution",
+	"injectionSelector": "L:source.fsharp (meta.embedded.template.html, meta.embedded.template.sql, meta.embedded.template.css) - meta.embedded.template.substitution",
 	"patterns": [
 		{
 			"contentName": "meta.embedded.template.substitution",
-			"begin": "\\{",
-			"end": "\\}",
+			"begin": "(?<!\\{)\\{(?!\\{)",
+			"end": "(?<!\\})\\}(?!\\})",
 			"patterns": [
 				{
 					"include": "source.fsharp"
