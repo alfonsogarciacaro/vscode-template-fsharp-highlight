@@ -25,8 +25,8 @@ function tryFirst<T>(...ops: (() => T)[]): T | undefined {
 	}
 }
 
-function findNonNestedBraces(text: string): { start: number, end: number }[] {
-	const results = [];
+function findNonNestedBraces(text: string, addLastNonClosedBraceIfAny = false) {
+	const results: { start: number, end?: number }[] = [];
 	const braces =
 		[
 			mapToArray(text.matchAll(/(?<!\{)\{(?!\{)/g), m => ({ index: m.index, isOpen: true })),
@@ -54,6 +54,10 @@ function findNonNestedBraces(text: string): { start: number, end: number }[] {
 				nestedLevel--;
 			}
 		}
+	}
+
+	if (lastOpenBrace != null && addLastNonClosedBraceIfAny) {
+		results.push({ start: lastOpenBrace });
 	}
 
 	return results;
@@ -84,18 +88,11 @@ function replaceNonNestedBracesWithWhitespace(text: string) {
 	}
 }
 
-function tryCssVirtualContent(documentText: string, offset: number) {
-	const virtualContent = tryVirtualContent(documentText, offset, /[ ._]css\s+\$"""/g, /"""/);
-	if (virtualContent != null) return ["css", virtualContent];
-}
-
-function tryHtmlVirtualContent(documentText: string, offset: number) {
-	const virtualContent = tryVirtualContent(documentText, offset, /[ ._](html|svg)\s+\$"""/g, /"""/);
-	if (virtualContent != null) return ["html", virtualContent];
-}
-
 /** startPattern must be a global RegExp */
-function tryVirtualContent(documentText: string, offset: number, startPattern: RegExp, endPattern: RegExp): string | undefined {
+function tryVirtualContent(documentText: string, offset: number): [string, string] | undefined {
+	const startPattern = /[ ._](html|svg|css)\s+\$"""/g;
+	const endPattern = /"""/;
+
 	let startMatches = Array.from(documentText.slice(0, offset).matchAll(startPattern));
 	if (startMatches.length === 0) {
 		return;
@@ -112,26 +109,35 @@ function tryVirtualContent(documentText: string, offset: number, startPattern: R
 		return;
 	}
 
-	// First fill virtualContent with whitespace
-	let virtualContent = replaceWithWhitespace(documentText);
-
-	for (let startMatch of startMatches) {
-		const regionStart = startMatch.index + startMatch[0].length;
-		const endMatch = documentText.slice(regionStart).match(endPattern);
-		const regionEnd = endMatch ? regionStart + endMatch.index : documentText.length;
-		// Replace F# escape braces
-		let regionContent = documentText.slice(regionStart, regionEnd)
-		regionContent =
-			// Looks like replacing F# content in braces with whitespace doesn't help the autocomplete for html/css
-			// replaceNonNestedBracesWithWhitespace(regionContent)
-			regionContent
-				.replace(/\{\{/g, "{ ")
-				.replace(/\}\}/g, "} ")
-				.replace(/%%/g, "% ");
-		virtualContent = virtualContent.slice(0, regionStart) + regionContent + virtualContent.slice(regionEnd);
+	// Check we're not in a hole
+	const braces = findNonNestedBraces(documentText.slice(regionStart, offset), true);
+	if (braces.length > 0 && braces[braces.length - 1].end == null) {
+		return;
 	}
 
-	return virtualContent;
+	let virtualId = lastStartMatch[1];
+
+	// First fill virtualContent with whitespace
+	let virtualContent = replaceWithWhitespace(documentText);
+	startMatches
+		.filter(m => m[1] === virtualId)
+		.forEach(startMatch => {
+			const regionStart = startMatch.index + startMatch[0].length;
+			const endMatch = documentText.slice(regionStart).match(endPattern);
+			const regionEnd = endMatch ? regionStart + endMatch.index : documentText.length;
+			// Replace F# escape braces
+			let regionContent = documentText.slice(regionStart, regionEnd)
+			regionContent =
+				// Looks like replacing F# content in braces with whitespace doesn't help the autocomplete for html/css
+				// replaceNonNestedBracesWithWhitespace(regionContent)
+				regionContent
+					.replace(/\{\{/g, "{ ")
+					.replace(/\}\}/g, "} ")
+					.replace(/%%/g, "% ");
+			virtualContent = virtualContent.slice(0, regionStart) + regionContent + virtualContent.slice(regionEnd);
+		});
+
+	return [virtualId, virtualContent];
 }
 
 export function activate(context: ExtensionContext) {
@@ -153,10 +159,7 @@ export function activate(context: ExtensionContext) {
 				context.triggerKind
 				const documentText = document.getText();
 				const documentOffset = document.offsetAt(position);
-				const virtual = tryFirst(
-					() => tryHtmlVirtualContent(documentText, documentOffset),
-					() => tryCssVirtualContent(documentText, documentOffset),
-				);
+				const virtual = tryVirtualContent(documentText, documentOffset);
 				if (virtual != null) {
 					const [virtualId, virtualContent] = virtual;
 					const originalUri = document.uri.toString();
