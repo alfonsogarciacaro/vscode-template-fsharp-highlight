@@ -90,24 +90,15 @@ function replaceNonNestedBracesWithWhitespace(text: string) {
 
 /** startPattern must be a global RegExp */
 function tryVirtualContent(documentText: string, offset: number): [string, string] | undefined {
-	const startPattern = /[ ._](html|svg|css)\s+\$"""/g;
+	const pattern = /[ ._](html|svg|css)(\s+\$""")(?:(?!""")[\s\S])+$/;
 	const endPattern = /"""/;
 
-	let startMatches = Array.from(documentText.slice(0, offset).matchAll(startPattern));
-	if (startMatches.length === 0) {
+	const match = documentText.slice(0, offset).match(pattern);
+	if (match == null) {
 		return;
 	}
 
-	const lastStartMatch = startMatches[startMatches.length - 1];
-	const regionStart = lastStartMatch.index + lastStartMatch[0].length;
-	if (regionStart === offset) {
-		return;
-	}
-
-	const endMatchBeforeOffset = documentText.slice(regionStart, offset).match(endPattern);
-	if (endMatchBeforeOffset != null) {
-		return;
-	}
+	const regionStart = match.index + 1 + match[1].length + match[2].length;
 
 	// Check we're not in a hole
 	const braces = findNonNestedBraces(documentText.slice(regionStart, offset), true);
@@ -115,27 +106,22 @@ function tryVirtualContent(documentText: string, offset: number): [string, strin
 		return;
 	}
 
-	let virtualId = lastStartMatch[1];
+	const endMatch = documentText.slice(regionStart).match(endPattern);
+	const regionEnd = endMatch ? regionStart + endMatch.index : documentText.length;
 
+	// Replace F# escape braces
+	let regionContent = documentText.slice(regionStart, regionEnd);
+	// Looks like replacing F# content in braces with whitespace doesn't help the autocomplete for html/css
+	// regionContent = replaceNonNestedBracesWithWhitespace(regionContent);
+	regionContent = regionContent
+		.replace(/\{\{/g, "{ ")
+		.replace(/\}\}/g, "} ")
+		.replace(/%%/g, "% ");
+	
+	let virtualId = match[1];
 	// First fill virtualContent with whitespace
 	let virtualContent = replaceWithWhitespace(documentText);
-	startMatches
-		.filter(m => m[1] === virtualId)
-		.forEach(startMatch => {
-			const regionStart = startMatch.index + startMatch[0].length;
-			const endMatch = documentText.slice(regionStart).match(endPattern);
-			const regionEnd = endMatch ? regionStart + endMatch.index : documentText.length;
-			// Replace F# escape braces
-			let regionContent = documentText.slice(regionStart, regionEnd)
-			regionContent =
-				// Looks like replacing F# content in braces with whitespace doesn't help the autocomplete for html/css
-				// replaceNonNestedBracesWithWhitespace(regionContent)
-				regionContent
-					.replace(/\{\{/g, "{ ")
-					.replace(/\}\}/g, "} ")
-					.replace(/%%/g, "% ");
-			virtualContent = virtualContent.slice(0, regionStart) + regionContent + virtualContent.slice(regionEnd);
-		});
+	virtualContent = virtualContent.slice(0, regionStart) + regionContent + virtualContent.slice(regionEnd);
 
 	return [virtualId, virtualContent];
 }
@@ -156,7 +142,6 @@ export function activate(context: ExtensionContext) {
 		[{ scheme: 'file', language: 'fsharp' }],
 		{
 			async provideCompletionItems(document, position, token, context) {
-				context.triggerKind
 				const documentText = document.getText();
 				const documentOffset = document.offsetAt(position);
 				const virtual = tryVirtualContent(documentText, documentOffset);
