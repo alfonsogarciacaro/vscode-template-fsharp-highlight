@@ -3,7 +3,7 @@
   "displayName": "Highlight HTML/SQL templates in F#",
   "description": "Syntax highlighting for template strings in F#",
   "icon": "fsharp.png",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "alfonsogarciacaro",  
   "license": "MIT",
   "repository": {
@@ -31,9 +31,14 @@
         "scopeName": "template.fsharp.injection",
         "path": "./syntaxes/grammar.json",
         "embeddedLanguages": {
-          "meta.embedded.template.html": "html",
-          "meta.embedded.template.sql": "sql",
-          "meta.embedded.template.css": "css"
+          "meta.embedded.string.html": "html",
+          "meta.embedded.string.sql": "sql",
+          "meta.embedded.string.css": "css",
+          "meta.embedded.string.js": "js",
+          "meta.embedded.interpolated.html": "html",
+          "meta.embedded.interpolated.sql": "sql",
+          "meta.embedded.interpolated.css": "css",
+          "meta.embedded.interpolated.js": "js"
         }
       },
       {
@@ -43,7 +48,7 @@
         "scopeName": "template.fsharp.reinjection",
         "path": "./syntaxes/reinject-grammar.json",
         "embeddedLanguages": {
-          "meta.embedded.template.substitution": "fsharp"
+          "meta.embedded.interpolated.substitution": "fsharp"
         }
       }
     ]

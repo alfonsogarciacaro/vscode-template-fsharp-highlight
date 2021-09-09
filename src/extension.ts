@@ -90,7 +90,7 @@ function replaceNonNestedBracesWithWhitespace(text: string) {
 
 /** startPattern must be a global RegExp */
 function tryVirtualContent(documentText: string, offset: number): [string, string] | undefined {
-	const pattern = /[ ._](html|svg|css)(\s+\$""")(?:(?!""")[\s\S])+$/;
+	const pattern = /[ ._](html|svg|css|js)(\s+\$?""")(?:(?!""")[\s\S])+$/;
 	const endPattern = /"""/;
 
 	const match = documentText.slice(0, offset).match(pattern);
@@ -98,25 +98,32 @@ function tryVirtualContent(documentText: string, offset: number): [string, strin
 		return;
 	}
 
+	const isInterpolated = match[2].endsWith('$"""');
 	const regionStart = match.index + 1 + match[1].length + match[2].length;
 
-	// Check we're not in a hole
-	const braces = findNonNestedBraces(documentText.slice(regionStart, offset), true);
-	if (braces.length > 0 && braces[braces.length - 1].end == null) {
-		return;
+	if (isInterpolated) {
+		// Check we're not in a hole
+		const braces = findNonNestedBraces(documentText.slice(regionStart, offset), true);
+		if (braces.length > 0 && braces[braces.length - 1].end == null) {
+			return;
+		}
 	}
 
 	const endMatch = documentText.slice(regionStart).match(endPattern);
 	const regionEnd = endMatch ? regionStart + endMatch.index : documentText.length;
 
-	// Replace F# escape braces
 	let regionContent = documentText.slice(regionStart, regionEnd);
-	// Looks like replacing F# content in braces with whitespace doesn't help the autocomplete for html/css
-	// regionContent = replaceNonNestedBracesWithWhitespace(regionContent);
-	regionContent = regionContent
-		.replace(/\{\{/g, "{ ")
-		.replace(/\}\}/g, "} ")
-		.replace(/%%/g, "% ");
+
+	if (isInterpolated) {
+		// Looks like replacing F# content in braces with whitespace doesn't help the autocomplete for html/css
+		// regionContent = replaceNonNestedBracesWithWhitespace(regionContent);
+
+		// Replace F# escape braces
+		regionContent = regionContent
+			.replace(/\{\{/g, "{ ")
+			.replace(/\}\}/g, "} ")
+			.replace(/%%/g, "% ");
+	}
 	
 	let virtualId = match[1];
 	// First fill virtualContent with whitespace
@@ -186,9 +193,38 @@ export function activate(context: ExtensionContext) {
 				}
 			}
 		},
-		">"
+		">", "."
 	)
 
 	// TODO: Forwarding hover is not working well, not sure why
 	// languages.registerHoverProvider
+	languages.registerHoverProvider(
+		[{ scheme: 'file', language: 'fsharp' }],
+		{
+			async provideHover(document, position, token) {
+				const documentText = document.getText();
+				const documentOffset = document.offsetAt(position);
+				const virtual = tryVirtualContent(documentText, documentOffset);
+				if (virtual != null) {
+					const [virtualId, virtualContent] = virtual;
+					const originalUri = document.uri.toString();
+					const vdocUriString = `embedded-content://${virtualId}/${encodeURIComponent(
+						originalUri
+						)}.${virtualId}`;
+
+					virtualDocumentContents.set(originalUri, virtualContent);
+					const vdocUri = Uri.parse(vdocUriString);
+
+					const result = await commands.executeCommand<Hover[]>(
+						'vscode.executeHoverProvider',
+						vdocUri,
+						position,
+					);
+					if (result.length > 0) {
+						return result[0];
+					}
+				}
+			}
+		}
+	)	
 }

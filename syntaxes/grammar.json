@@ -3,8 +3,8 @@
 	"injectionSelector": "L:source.fsharp - (comment, string.quoted.double.fsharp, string.quoted.triple.fsharp)",
 	"patterns": [
 		{
-			"begin": "[ ._](html|svg) *(?:(?=\\$)|$)",
-			"end": "\"{3}",
+			"begin": "[ ._](html|svg) *(?:(?= \\$?\"{3})|$)",
+			"end": "(?<=\"{3})",
 			"beginCaptures": {
 				"1": {
 					"name": "variable.fsharp"
@@ -12,7 +12,59 @@
 			},
 			"patterns": [
 				{
-					"include": "#html_template"
+					"contentName": "meta.embedded.interpolated.html",
+					"begin": "\\$\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "text.html.derivative"
+						}
+					]
+				},
+				{
+					"contentName": "meta.embedded.string.html",
+					"begin": "\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "text.html.derivative"
+						}
+					]
+				},
+				
+				{
+					"include": "source.fsharp"
+				}
+			]
+		},
+		{
+			"begin": "[ ._](sql) *(?:(?= \\$?\"{3})|$)",
+			"end": "(?<=\"{3})",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.interpolated.sql",
+					"begin": "\\$\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "source.sql"
+						}
+					]
+				},
+				{
+					"contentName": "meta.embedded.string.sql",
+					"begin": "\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "source.sql"
+						}
+					]
 				},
 				{
 					"include": "source.fsharp"
@@ -20,8 +72,8 @@
 			]
 		},
 		{
-			"begin": "[ ._](sql) *(?:(?=\\$)|$)",
-			"end": "\"{3}",
+			"begin": "[ ._](css) *(?:(?= \\$?\"{3})|$)",
+			"end": "(?<=\"{3})",
 			"beginCaptures": {
 				"1": {
 					"name": "variable.fsharp"
@@ -29,7 +81,24 @@
 			},
 			"patterns": [
 				{
-					"include": "#sql_template"
+					"contentName": "meta.embedded.interpolated.css",
+					"begin": "\\$\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "source.css"
+						}
+					]
+				},
+				{
+					"contentName": "meta.embedded.string.css",
+					"begin": "\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "source.css"
+						}
+					]
 				},
 				{
 					"include": "source.fsharp"
@@ -37,8 +106,8 @@
 			]
 		},
 		{
-			"begin": "[ ._](css) *(?:(?=\\$)|$)",
-			"end": "\"{3}",
+			"begin": "[ ._](js) *(?:(?= \\$?\"{3})|$)",
+			"end": "(?<=\"{3})",
 			"beginCaptures": {
 				"1": {
 					"name": "variable.fsharp"
@@ -46,45 +115,29 @@
 			},
 			"patterns": [
 				{
-					"include": "#css_template"
+					"contentName": "meta.embedded.interpolated.js",
+					"begin": "\\$\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "source.js"
+						}
+					]
+				},
+				{
+					"contentName": "meta.embedded.string.js",
+					"begin": "\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "source.js"
+						}
+					]
 				},
 				{
 					"include": "source.fsharp"
 				}
 			]
 		}
-
-	],
-	"repository": {
-		"html_template": {
-			"contentName": "meta.embedded.template.html",
-			"begin": "\\$\"{3}",
-			"end": "(?=\"{3})",
-			"patterns": [
-				{
-					"include": "text.html.derivative"
-				}
-			]
-		},
-		"sql_template": {
-			"contentName": "meta.embedded.template.sql",
-			"begin": "\\$\"{3}",
-			"end": "(?=\"{3})",
-			"patterns": [
-				{
-					"include": "source.sql"
-				}
-			]
-		},
-		"css_template": {
-			"contentName": "meta.embedded.template.css",
-			"begin": "\\$\"{3}",
-			"end": "(?=\"{3})",
-			"patterns": [
-				{
-					"include": "source.css"
-				}
-			]
-		}
-	}
+	]
 }
