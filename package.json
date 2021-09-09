@@ -19,10 +19,17 @@
     "Other"
   ],
 	"activationEvents": [
-		"onLanguage:fsharp"
+		"onLanguage:fsharp",
+    "onCommand:template.fsharp.comment"
 	],  
   "main": "./out/extension",
   "contributes": {
+    "commands": [
+      {
+        "command": "template.fsharp.comment",
+        "title": "F#: template comment"
+      }
+    ],    
     "grammars": [
       {
         "injectTo": [

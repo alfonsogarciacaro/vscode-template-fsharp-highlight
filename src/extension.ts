@@ -1,4 +1,4 @@
-import { commands, CompletionList, ExtensionContext, Hover, languages, SnippetString, Uri, workspace } from 'vscode';
+import { commands, CompletionList, ExtensionContext, Hover, languages, Position, SnippetString, TextEditor, TextEditorEdit, Uri, workspace } from 'vscode';
 
 function last<T>(xs: Iterable<T>): T | undefined {
 	let res: T | undefined;
@@ -90,7 +90,7 @@ function replaceNonNestedBracesWithWhitespace(text: string) {
 
 /** startPattern must be a global RegExp */
 function tryVirtualContent(documentText: string, offset: number): [string, string] | undefined {
-	const pattern = /[ ._](html|svg|css|js)(\s+\$?""")(?:(?!""")[\s\S])+$/;
+	const pattern = /[ ._](html|svg|sql|css|js)(\s+\$?""")(?:(?!""")[\s\S])+$/;
 	const endPattern = /"""/;
 
 	const match = documentText.slice(0, offset).match(pattern);
@@ -124,7 +124,7 @@ function tryVirtualContent(documentText: string, offset: number): [string, strin
 			.replace(/\}\}/g, "} ")
 			.replace(/%%/g, "% ");
 	}
-	
+
 	let virtualId = match[1];
 	// First fill virtualContent with whitespace
 	let virtualContent = replaceWithWhitespace(documentText);
@@ -133,7 +133,60 @@ function tryVirtualContent(documentText: string, offset: number): [string, strin
 	return [virtualId, virtualContent];
 }
 
+function onTemplateComment(textEditor: TextEditor, edit: TextEditorEdit) {
+	const document = textEditor.document;
+	const selection = textEditor.selection;
+	const documentText = document.getText();
+	const documentOffset = document.offsetAt(selection.end);
+	const virtual = tryVirtualContent(documentText, documentOffset);
+	if (virtual != null) {
+		function comment(startMark: string, endMark?: string) {
+			function commentLine(line: number, end?: boolean) {
+				const lineText = documentText.slice(
+					document.offsetAt(new Position(line, 0)),
+					document.offsetAt(new Position(line + 1, 0))
+				);
+				let character = lineText.length;
+				if (!end) {
+					const match = lineText.match(/^\s*/);
+					character = match == null ? 0 : match[0].length;
+				}
+				edit.insert(new Position(line, character), end ? " " + endMark : startMark + " ");
+			}
+			if (endMark) {
+				commentLine(selection.anchor.line);
+				commentLine(selection.active.line, true);
+			} else {
+				for (let line = selection.anchor.line; line <= selection.active.line; line++) {
+					commentLine(line);
+				}
+			}
+		}
+
+		const [virtualId, _] = virtual;
+		switch (virtualId) {
+			case "html":
+			case "svg":
+				comment("<!--", "-->");
+				return;
+			case "css":
+				comment("/*", "*/");
+				return;
+			case "sql":
+				comment("--");
+				return;
+			case "js":
+				comment("//");
+				return;
+			default:
+				return;
+		}
+	}
+}
+
 export function activate(context: ExtensionContext) {
+	context.subscriptions.push(commands.registerTextEditorCommand('template.fsharp.comment', onTemplateComment));
+
 	const virtualDocumentContents = new Map<string, string>();
 
 	workspace.registerTextDocumentContentProvider('embedded-content', {
@@ -226,5 +279,5 @@ export function activate(context: ExtensionContext) {
 				}
 			}
 		}
-	)	
+	)
 }
