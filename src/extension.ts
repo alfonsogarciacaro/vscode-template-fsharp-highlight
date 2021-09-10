@@ -1,4 +1,4 @@
-import { commands, CompletionList, ExtensionContext, Hover, languages, Position, SnippetString, TextEditor, TextEditorEdit, Uri, workspace } from 'vscode';
+import { commands, CompletionList, ExtensionContext, Hover, languages, Position, Range, Selection, SnippetString, TextDocument, TextEditor, TextEditorEdit, Uri, workspace } from 'vscode';
 
 function last<T>(xs: Iterable<T>): T | undefined {
 	let res: T | undefined;
@@ -133,19 +133,43 @@ function tryVirtualContent(documentText: string, offset: number): [string, strin
 	return [virtualId, virtualContent];
 }
 
-function onTemplateComment(textEditor: TextEditor, edit: TextEditorEdit) {
+function getCommentMarks(virtualId: string): [start: string, end?: string] | undefined {
+	switch (virtualId) {
+		case "html":
+		case "svg":
+			return ["<!--", "-->"];
+		case "css":
+			return ["/*", "*/"];
+		case "sql":
+			return ["--"];
+		case "js":
+			return ["//"];
+		default:
+			return;
+	}
+}
+
+function getLineText(document: TextDocument, line: number) {
+	return document.getText().slice(
+		document.offsetAt(new Position(line, 0)),
+		document.offsetAt(new Position(line + 1, 0))
+	);
+}
+
+function getSelectionStartAndEndLines(selection: Selection): [number, number] {
+	return selection.anchor.line <= selection.active.line
+		? [selection.anchor.line, selection.active.line]
+		: [selection.active.line, selection.anchor.line];
+}
+
+function onAddTemplateComment(textEditor: TextEditor, edit: TextEditorEdit) {
 	const document = textEditor.document;
 	const selection = textEditor.selection;
-	const documentText = document.getText();
-	const documentOffset = document.offsetAt(selection.end);
-	const virtual = tryVirtualContent(documentText, documentOffset);
+	const virtual = tryVirtualContent(document.getText(), document.offsetAt(selection.end));
 	if (virtual != null) {
 		function comment(startMark: string, endMark?: string) {
 			function commentLine(line: number, end?: boolean) {
-				const lineText = documentText.slice(
-					document.offsetAt(new Position(line, 0)),
-					document.offsetAt(new Position(line + 1, 0))
-				);
+				const lineText = getLineText(document, line)
 				let character = lineText.length;
 				if (!end) {
 					const match = lineText.match(/^\s*/);
@@ -153,39 +177,76 @@ function onTemplateComment(textEditor: TextEditor, edit: TextEditorEdit) {
 				}
 				edit.insert(new Position(line, character), end ? " " + endMark : startMark + " ");
 			}
+			const [startLine, endLine] = getSelectionStartAndEndLines(selection);
 			if (endMark) {
-				commentLine(selection.anchor.line);
-				commentLine(selection.active.line, true);
+				commentLine(startLine);
+				commentLine(endLine, true);
 			} else {
-				for (let line = selection.anchor.line; line <= selection.active.line; line++) {
+				for (let line = startLine; line <= endLine; line++) {
 					commentLine(line);
 				}
 			}
 		}
 
 		const [virtualId, _] = virtual;
-		switch (virtualId) {
-			case "html":
-			case "svg":
-				comment("<!--", "-->");
-				return;
-			case "css":
-				comment("/*", "*/");
-				return;
-			case "sql":
-				comment("--");
-				return;
-			case "js":
-				comment("//");
-				return;
-			default:
-				return;
+		const marks = getCommentMarks(virtualId);
+		if (marks != null) {
+			const [start, end] = marks;
+			comment(start, end);
+		}
+	}
+}
+
+function onRemoveTemplateComment(textEditor: TextEditor, edit: TextEditorEdit) {
+	const document = textEditor.document;
+	const selection = textEditor.selection;
+	const virtual = tryVirtualContent(document.getText(), document.offsetAt(selection.end));
+	if (virtual != null) {
+		function uncomment(startMark: string, endMark?: string) {
+			function uncommentLine(line: number, end?: boolean) {
+				const mark = end ? endMark : startMark;
+				const lineText = getLineText(document, line);
+				let index = lineText.indexOf(mark);
+				if (index >= 0) {
+					let len = mark.length;
+					if (end) {
+						if (index > 1 && lineText[index - 1] === " ") {
+							index--;
+							len++
+						}
+					} else {
+						const nextIndex = index + len;
+						if (nextIndex < lineText.length && lineText[nextIndex] === " ") {
+							len++;
+						}
+					}
+					let pos = new Position(line, index);
+					edit.delete(new Range(pos, pos.with({ character: pos.character + len })));
+				}
+			}
+			const [startLine, endLine] = getSelectionStartAndEndLines(selection);
+			if (endMark) {
+				uncommentLine(startLine);
+				uncommentLine(endLine, true);
+			} else {
+				for (let line = startLine; line <= endLine; line++) {
+					uncommentLine(line);
+				}
+			}
+		}
+
+		const [virtualId, _] = virtual;
+		const marks = getCommentMarks(virtualId);
+		if (marks != null) {
+			const [start, end] = marks;
+			uncomment(start, end);
 		}
 	}
 }
 
 export function activate(context: ExtensionContext) {
-	context.subscriptions.push(commands.registerTextEditorCommand('template.fsharp.comment', onTemplateComment));
+	context.subscriptions.push(commands.registerTextEditorCommand('template.fsharp.addComment', onAddTemplateComment));
+	context.subscriptions.push(commands.registerTextEditorCommand('template.fsharp.removeComment', onRemoveTemplateComment));
 
 	const virtualDocumentContents = new Map<string, string>();
 
@@ -224,7 +285,7 @@ export function activate(context: ExtensionContext) {
 					const originalUri = document.uri.toString();
 					const vdocUriString = `embedded-content://${virtualId}/${encodeURIComponent(
 						originalUri
-						)}.${virtualId}`;
+					)}.${virtualId}`;
 
 					virtualDocumentContents.set(originalUri, virtualContent);
 					const vdocUri = Uri.parse(vdocUriString);
@@ -275,7 +336,7 @@ export function activate(context: ExtensionContext) {
 					const originalUri = document.uri.toString();
 					const vdocUriString = `embedded-content://${virtualId}/${encodeURIComponent(
 						originalUri
-						)}.${virtualId}`;
+					)}.${virtualId}`;
 
 					virtualDocumentContents.set(originalUri, virtualContent);
 					const vdocUri = Uri.parse(vdocUriString);

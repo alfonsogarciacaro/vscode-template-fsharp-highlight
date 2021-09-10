@@ -3,7 +3,7 @@
   "displayName": "Highlight HTML/SQL templates in F#",
   "description": "Syntax highlighting for template strings in F#",
   "icon": "fsharp.png",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "publisher": "alfonsogarciacaro",  
   "license": "MIT",
   "repository": {
@@ -26,10 +26,26 @@
   "contributes": {
     "commands": [
       {
-        "command": "template.fsharp.comment",
-        "title": "F#: template comment"
+        "command": "template.fsharp.addComment",
+        "title": "F#: Add template comment"
+      },
+      {
+        "command": "template.fsharp.removeComment",
+        "title": "F#: Remove template comment"
       }
-    ],    
+    ],
+    "keybindings": [
+			{
+				"command": "template.fsharp.addComment",
+				"key": "ctrl+shift+k ctrl+shift+c",
+				"when": "editorFocus && editorLangId == 'fsharp'"
+			},
+			{
+				"command": "template.fsharp.removeComment",
+				"key": "ctrl+shift+k ctrl+shift+u",
+				"when": "editorFocus && editorLangId == 'fsharp'"
+			}
+    ],
     "grammars": [
       {
         "injectTo": [
