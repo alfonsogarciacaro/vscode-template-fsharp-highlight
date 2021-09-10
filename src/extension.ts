@@ -207,6 +207,20 @@ export function activate(context: ExtensionContext) {
 				const virtual = tryVirtualContent(documentText, documentOffset);
 				if (virtual != null) {
 					const [virtualId, virtualContent] = virtual;
+					switch (context.triggerCharacter) {
+						case "<":
+						case "/":
+							if (!(virtualId === "html" || virtualId === "svg")) {
+								return;
+							}
+							break;
+						case ".":
+							if (virtualId !== "js") {
+								return;
+							}
+							break;
+					}
+
 					const originalUri = document.uri.toString();
 					const vdocUriString = `embedded-content://${virtualId}/${encodeURIComponent(
 						originalUri
@@ -217,19 +231,17 @@ export function activate(context: ExtensionContext) {
 
 					// Auto-closing tags is not working so try to provide our own
 					if (context.triggerCharacter === ">") {
-						if ((virtualId === "html" || virtualId === "svg")) {
-							if (documentText[documentOffset - 2] !== "/") {
-								const tagMatch = last(virtualContent.slice(0, documentOffset).matchAll(/<([\w-]+)/g));
-								if (tagMatch) {
-									const tag = tagMatch[1];
-									// TODO: complete this list
-									const noClosingTags = ["area", "br", "col", "hr", "img", "input", "link"];
-									if (noClosingTags.indexOf(tag) === -1) {
-										return new CompletionList([{
-											label: `</${tag}>`,
-											insertText: new SnippetString(`$0</${tag}>`,)
-										}])
-									}
+						if (documentText[documentOffset - 2] !== "/") {
+							const tagMatch = last(virtualContent.slice(0, documentOffset).matchAll(/<\/?([\w-]+)/g));
+							if (tagMatch && tagMatch[0][1] !== "/") {
+								const tag = tagMatch[1];
+								// TODO: complete this list
+								const noClosingTags = ["area", "br", "col", "hr", "img", "input", "link"];
+								if (noClosingTags.indexOf(tag) === -1) {
+									return new CompletionList([{
+										label: `</${tag}>`,
+										insertText: new SnippetString(`$0</${tag}>`,)
+									}])
 								}
 							}
 						}
@@ -246,7 +258,7 @@ export function activate(context: ExtensionContext) {
 				}
 			}
 		},
-		">", "."
+		">", "/", "."
 	)
 
 	// TODO: Forwarding hover is not working well, not sure why
