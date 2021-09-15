@@ -3,7 +3,7 @@
   "displayName": "Highlight HTML/SQL templates in F#",
   "description": "Syntax highlighting for template strings in F#",
   "icon": "fsharp.png",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "publisher": "alfonsogarciacaro",  
   "license": "MIT",
   "repository": {

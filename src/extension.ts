@@ -25,8 +25,10 @@ function tryFirst<T>(...ops: (() => T)[]): T | undefined {
 	}
 }
 
-function findNonNestedBraces(text: string, addLastNonClosedBraceIfAny = false) {
-	const results: { start: number, end?: number }[] = [];
+type Brace = { start: number, end?: number };
+
+function findNonNestedBraces({ text, addLastNonClosedBraceIfAny = false }: { text: string, addLastNonClosedBraceIfAny?: boolean }) {
+	const results: Brace[] = [];
 	const braces =
 		[
 			mapToArray(text.matchAll(/(?<!\{)\{(?!\{)/g), m => ({ index: m.index, isOpen: true })),
@@ -71,8 +73,8 @@ function replaceWithWhitespace(text: string) {
 		}).join('\n');
 }
 
-function replaceNonNestedBracesWithWhitespace(text: string) {
-	const braces = findNonNestedBraces(text);
+function replaceNonNestedBracesWithWhitespace(text: string, braces?: Brace[]) {
+	braces = braces || findNonNestedBraces({ text });
 	if (braces.length === 0) {
 		return text;
 	} else {
@@ -89,34 +91,38 @@ function replaceNonNestedBracesWithWhitespace(text: string) {
 }
 
 /** startPattern must be a global RegExp */
-function tryVirtualContent(documentText: string, offset: number): [string, string] | undefined {
+function tryVirtualContent({ text, offset, ignoreHoles = true }: { text: string, offset: number, ignoreHoles?: boolean } ): [string, string] | undefined {
 	const pattern = /[ ._](html|svg|sql|css|js)(\s+\$?""")(?:(?!""")[\s\S])+$/;
 	const endPattern = /"""/;
 
-	const match = documentText.slice(0, offset).match(pattern);
+	const match = text.slice(0, offset).match(pattern);
 	if (match == null) {
 		return;
 	}
 
+	const virtualId = match[1];
 	const isInterpolated = match[2].endsWith('$"""');
 	const regionStart = match.index + 1 + match[1].length + match[2].length;
 
-	if (isInterpolated) {
+	let holes;
+	if (isInterpolated && ignoreHoles) {
 		// Check we're not in a hole
-		const braces = findNonNestedBraces(documentText.slice(regionStart, offset), true);
-		if (braces.length > 0 && braces[braces.length - 1].end == null) {
+		holes = findNonNestedBraces({ text: text.slice(regionStart, offset), addLastNonClosedBraceIfAny: true });
+		if (holes.length > 0 && holes[holes.length - 1].end == null) {
 			return;
 		}
 	}
 
-	const endMatch = documentText.slice(regionStart).match(endPattern);
-	const regionEnd = endMatch ? regionStart + endMatch.index : documentText.length;
+	const endMatch = text.slice(regionStart).match(endPattern);
+	const regionEnd = endMatch ? regionStart + endMatch.index : text.length;
 
-	let regionContent = documentText.slice(regionStart, regionEnd);
+	let regionContent = text.slice(regionStart, regionEnd);
 
 	if (isInterpolated) {
-		// Looks like replacing F# content in braces with whitespace doesn't help the autocomplete for html/css
-		// regionContent = replaceNonNestedBracesWithWhitespace(regionContent);
+		// Replacing F# content in braces with whitespace helps autocomplete for css
+		if (virtualId === "css") {
+			regionContent = replaceNonNestedBracesWithWhitespace(regionContent, holes);
+		}
 
 		// Replace F# escape braces
 		regionContent = regionContent
@@ -125,9 +131,8 @@ function tryVirtualContent(documentText: string, offset: number): [string, strin
 			.replace(/%%/g, "% ");
 	}
 
-	let virtualId = match[1];
 	// First fill virtualContent with whitespace
-	let virtualContent = replaceWithWhitespace(documentText);
+	let virtualContent = replaceWithWhitespace(text);
 	virtualContent = virtualContent.slice(0, regionStart) + regionContent + virtualContent.slice(regionEnd);
 
 	return [virtualId, virtualContent];
@@ -157,15 +162,28 @@ function getLineText(document: TextDocument, line: number) {
 }
 
 function getSelectionStartAndEndLines(selection: Selection): [number, number] {
-	return selection.anchor.line <= selection.active.line
-		? [selection.anchor.line, selection.active.line]
-		: [selection.active.line, selection.anchor.line];
+	let startPos = selection.anchor;
+	let endPos = selection.active;
+	if (startPos.line > endPos.line) {
+		const tmp = startPos;
+		startPos = endPos;
+		endPos = tmp;
+	}
+	const startLine = startPos.line;
+	const endLine = endPos.line > startLine && endPos.character === 0 ? endPos.line - 1 : endPos.line
+	return [startLine, endLine];
 }
 
 function onAddTemplateComment(textEditor: TextEditor, edit: TextEditorEdit) {
 	const document = textEditor.document;
 	const selection = textEditor.selection;
-	const virtual = tryVirtualContent(document.getText(), document.offsetAt(selection.end));
+	const virtual = tryVirtualContent({
+		text: document.getText(),
+		offset: document.offsetAt(selection.end),
+		// Don't ignore holes because it can be confusing for the user
+		// when the template comment is not activated
+		ignoreHoles: false
+	});
 	if (virtual != null) {
 		function comment(startMark: string, endMark?: string) {
 			function commentLine(line: number, end?: boolean) {
@@ -200,7 +218,11 @@ function onAddTemplateComment(textEditor: TextEditor, edit: TextEditorEdit) {
 function onRemoveTemplateComment(textEditor: TextEditor, edit: TextEditorEdit) {
 	const document = textEditor.document;
 	const selection = textEditor.selection;
-	const virtual = tryVirtualContent(document.getText(), document.offsetAt(selection.end));
+	const virtual = tryVirtualContent({
+		text: document.getText(),
+		offset: document.offsetAt(selection.end),
+		ignoreHoles: false
+	});	
 	if (virtual != null) {
 		function uncomment(startMark: string, endMark?: string) {
 			function uncommentLine(line: number, end?: boolean) {
@@ -265,7 +287,7 @@ export function activate(context: ExtensionContext) {
 			async provideCompletionItems(document, position, token, context) {
 				const documentText = document.getText();
 				const documentOffset = document.offsetAt(position);
-				const virtual = tryVirtualContent(documentText, documentOffset);
+				const virtual = tryVirtualContent({ text: documentText, offset: documentOffset });
 				if (virtual != null) {
 					const [virtualId, virtualContent] = virtual;
 					switch (context.triggerCharacter) {
@@ -330,7 +352,7 @@ export function activate(context: ExtensionContext) {
 			async provideHover(document, position, token) {
 				const documentText = document.getText();
 				const documentOffset = document.offsetAt(position);
-				const virtual = tryVirtualContent(documentText, documentOffset);
+				const virtual = tryVirtualContent({ text: documentText, offset: documentOffset });
 				if (virtual != null) {
 					const [virtualId, virtualContent] = virtual;
 					const originalUri = document.uri.toString();
