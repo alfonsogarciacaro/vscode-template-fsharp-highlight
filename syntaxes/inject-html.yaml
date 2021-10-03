@@ -1,0 +1,4 @@
+scopeName: inline.template-fsharp-highlight.injection.html
+injectionSelector: "L:meta.embedded"
+patterns:
+  - include: text.html.basic

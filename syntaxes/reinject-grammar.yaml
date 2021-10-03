@@ -1,0 +1,19 @@
+scopeName: inline.template-fsharp-highlight.reinjection
+injectionSelector: "L:string.quoted.triple.template meta.embedded.block"
+patterns:
+  - name: string.quoted.triple.template.substitution.fsharp
+    contentName: meta.template.expression.fsharp
+    begin: |
+      (?x)          # Ignore whitespace
+      (?<!\{)       # Not after brace
+      \{            # Literal brace
+      (?!\{)        # Not before brace
+    end: |
+      (?x)
+      (?<!})
+      }
+      (?!})
+    captures:
+      0: { name: keyword.symbol.fsharp }
+    patterns:
+      - include: source.fsharp

@@ -1,16 +1,22 @@
 {
-	"scopeName": "template.fsharp.reinjection",
-	"injectionSelector": "L:source.fsharp (meta.embedded.interpolated.html, meta.embedded.interpolated.sql, meta.embedded.interpolated.css, meta.embedded.interpolated.js) - meta.embedded.interpolated.substitution",
-	"patterns": [
-		{
-			"contentName": "meta.embedded.interpolated.substitution",
-			"begin": "(?<!\\{)\\{(?!\\{)",
-			"end": "(?<!\\})\\}(?!\\})",
-			"patterns": [
-				{
-					"include": "source.fsharp"
-				}
-			]
-		}
-	]
+  "scopeName": "inline.template-fsharp-highlight.reinjection",
+  "injectionSelector": "L:string.quoted.triple.template meta.embedded.block",
+  "patterns": [
+    {
+      "name": "string.quoted.triple.template.substitution.fsharp",
+      "contentName": "meta.template.expression.fsharp",
+      "begin": "(?x)          # Ignore whitespace\n(?<!\\{)       # Not after brace\n\\{            # Literal brace\n(?!\\{)        # Not before brace\n",
+      "end": "(?x)\n(?<!})\n}\n(?!})\n",
+      "captures": {
+        "0": {
+          "name": "keyword.symbol.fsharp"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.fsharp"
+        }
+      ]
+    }
+  ]
 }
