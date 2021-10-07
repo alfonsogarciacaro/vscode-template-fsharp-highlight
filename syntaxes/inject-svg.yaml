@@ -1,0 +1,7 @@
+scopeName: inline.template-fsharp-highlight.injection.html
+injectionSelector: "L:meta.embedded"
+patterns:
+  # If installed SVG extension then
+  - include: text.svg
+  # Else
+  - include: text.xml

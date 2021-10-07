@@ -1,0 +1,9 @@
+{
+  "scopeName": "inline.template-fsharp-highlight.injection.sql",
+  "injectionSelector": "L:meta.embedded",
+  "patterns": [
+    {
+      "include": "source.sql"
+    }
+  ]
+}

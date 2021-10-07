@@ -4,24 +4,24 @@
   "description": "Syntax highlighting for template strings in F#",
   "icon": "fsharp.png",
   "version": "1.4.1",
-  "publisher": "alfonsogarciacaro",  
+  "publisher": "alfonsogarciacaro",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/alfonsogarciacaro/vscode-template-fsharp-highlight.git"
   },
   "bugs": {
-      "url": "https://github.com/alfonsogarciacaro/vscode-template-fsharp-highlight/issues"
+    "url": "https://github.com/alfonsogarciacaro/vscode-template-fsharp-highlight/issues"
   },
-	"engines": {
-		"vscode": "^1.43.0"
-	},
+  "engines": {
+    "vscode": "^1.43.0"
+  },
   "categories": [
     "Other"
   ],
-	"activationEvents": [
-		"onLanguage:fsharp",
+  "activationEvents": [
+    "onLanguage:fsharp",
     "onCommand:template.fsharp.comment"
-	],  
+  ],
   "main": "./out/extension",
   "contributes": {
     "commands": [
@@ -35,57 +35,96 @@
       }
     ],
     "keybindings": [
-			{
-				"command": "template.fsharp.addComment",
-				"key": "ctrl+shift+k ctrl+shift+c",
-				"when": "editorFocus && editorLangId == 'fsharp'"
-			},
-			{
-				"command": "template.fsharp.removeComment",
-				"key": "ctrl+shift+k ctrl+shift+u",
-				"when": "editorFocus && editorLangId == 'fsharp'"
-			}
+      {
+        "command": "template.fsharp.addComment",
+        "key": "ctrl+shift+k ctrl+shift+c",
+        "when": "editorFocus && editorLangId == 'fsharp'"
+      },
+      {
+        "command": "template.fsharp.removeComment",
+        "key": "ctrl+shift+k ctrl+shift+u",
+        "when": "editorFocus && editorLangId == 'fsharp'"
+      }
     ],
     "grammars": [
       {
         "injectTo": [
           "source.fsharp"
         ],
-        "scopeName": "template.fsharp.injection",
-        "path": "./syntaxes/grammar.json",
+        "scopeName": "inline.template-fsharp-highlight",
+        "path": "./syntaxes/grammar.json"
+      },
+      {
+        "injectTo": [
+          "source.fsharp"
+        ],
+        "scopeName": "inline.template-fsharp-highlight.reinjection",
+        "path": "./syntaxes/reinject-grammar.json",
         "embeddedLanguages": {
-          "meta.embedded.string.html": "html",
-          "meta.embedded.string.sql": "sql",
-          "meta.embedded.string.css": "css",
-          "meta.embedded.string.js": "js",
-          "meta.embedded.interpolated.html": "html",
-          "meta.embedded.interpolated.sql": "sql",
-          "meta.embedded.interpolated.css": "css",
-          "meta.embedded.interpolated.js": "js"
+          "meta.template.expression.fsharp": "fsharp"
         }
       },
       {
         "injectTo": [
           "source.fsharp"
         ],
-        "scopeName": "template.fsharp.reinjection",
-        "path": "./syntaxes/reinject-grammar.json",
+        "scopeName": "inline.template-fsharp-highlight.injection.html",
+        "path": "./syntaxes/inject-html.json",
         "embeddedLanguages": {
-          "meta.embedded.interpolated.substitution": "fsharp"
+          "string.quoted.triple.template.html.fsharp": "html"
+        }
+      },
+      {
+        "injectTo": [
+          "source.fsharp"
+        ],
+        "scopeName": "inline.template-fsharp-highlight.injection.svg",
+        "path": "./syntaxes/inject-svg.json",
+        "embeddedLanguages": {
+          "string.quoted.triple.template.svg.fsharp": "xml"
+        }
+      },
+      {
+        "injectTo": [
+          "source.fsharp"
+        ],
+        "scopeName": "inline.template-fsharp-highlight.injection.css",
+        "path": "./syntaxes/inject-css.json",
+        "embeddedLanguages": {
+          "string.quoted.triple.template.css.fsharp": "css"
+        }
+      },
+      {
+        "injectTo": [
+          "source.fsharp"
+        ],
+        "scopeName": "inline.template-fsharp-highlight.injection.js",
+        "path": "./syntaxes/inject-js.json",
+        "embeddedLanguages": {
+          "string.quoted.triple.template.js.fsharp": "javascript"
+        }
+      },
+      {
+        "injectTo": [
+          "source.fsharp"
+        ],
+        "scopeName": "inline.template-fsharp-highlight.injection.sql",
+        "path": "./syntaxes/inject-sql.json",
+        "embeddedLanguages": {
+          "string.quoted.triple.template.sql.fsharp": "sql"
         }
       }
     ]
   },
-	"scripts": {
+  "scripts": {
     "compile": "tsc -b",
-		"watch": "tsc -b -w",
+    "watch": "tsc -b -w",
     "pack": "vsce package"
-	},
-	"dependencies": {
-	},
-	"devDependencies": {
+  },
+  "dependencies": {},
+  "devDependencies": {
     "@types/node": "^16.7.13",
-		"@types/vscode": "^1.43.0",
+    "@types/vscode": "^1.43.0",
     "typescript": "^4.2.2"
-	}
+  }
 }

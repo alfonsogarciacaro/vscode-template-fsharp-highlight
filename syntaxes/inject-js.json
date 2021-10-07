@@ -1,0 +1,9 @@
+{
+  "scopeName": "inline.template-fsharp-highlight.injection.js",
+  "injectionSelector": "L:meta.embedded",
+  "patterns": [
+    {
+      "include": "source.js"
+    }
+  ]
+}

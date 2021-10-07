@@ -1,143 +1,80 @@
 {
-	"scopeName": "template.fsharp.injection",
-	"injectionSelector": "L:source.fsharp - (comment, string.quoted.double.fsharp, string.quoted.triple.fsharp)",
-	"patterns": [
-		{
-			"begin": "[ ._](html|svg) *(?:(?= \\$?\"{3})|$)",
-			"end": "(?<=\"{3})",
-			"beginCaptures": {
-				"1": {
-					"name": "variable.fsharp"
-				}
-			},
-			"patterns": [
-				{
-					"contentName": "meta.embedded.interpolated.html",
-					"begin": "\\$\"{3}",
-					"end": "\"{3}",
-					"patterns": [
-						{
-							"include": "text.html.derivative"
-						}
-					]
-				},
-				{
-					"contentName": "meta.embedded.string.html",
-					"begin": "\"{3}",
-					"end": "\"{3}",
-					"patterns": [
-						{
-							"include": "text.html.derivative"
-						}
-					]
-				},
-				
-				{
-					"include": "source.fsharp"
-				}
-			]
-		},
-		{
-			"begin": "[ ._](sql) *(?:(?= \\$?\"{3})|$)",
-			"end": "(?<=\"{3})",
-			"beginCaptures": {
-				"1": {
-					"name": "variable.fsharp"
-				}
-			},
-			"patterns": [
-				{
-					"contentName": "meta.embedded.interpolated.sql",
-					"begin": "\\$\"{3}",
-					"end": "\"{3}",
-					"patterns": [
-						{
-							"include": "source.sql"
-						}
-					]
-				},
-				{
-					"contentName": "meta.embedded.string.sql",
-					"begin": "\"{3}",
-					"end": "\"{3}",
-					"patterns": [
-						{
-							"include": "source.sql"
-						}
-					]
-				},
-				{
-					"include": "source.fsharp"
-				}
-			]
-		},
-		{
-			"begin": "[ ._](css) *(?:(?= \\$?\"{3})|$)",
-			"end": "(?<=\"{3})",
-			"beginCaptures": {
-				"1": {
-					"name": "variable.fsharp"
-				}
-			},
-			"patterns": [
-				{
-					"contentName": "meta.embedded.interpolated.css",
-					"begin": "\\$\"{3}",
-					"end": "\"{3}",
-					"patterns": [
-						{
-							"include": "source.css"
-						}
-					]
-				},
-				{
-					"contentName": "meta.embedded.string.css",
-					"begin": "\"{3}",
-					"end": "\"{3}",
-					"patterns": [
-						{
-							"include": "source.css"
-						}
-					]
-				},
-				{
-					"include": "source.fsharp"
-				}
-			]
-		},
-		{
-			"begin": "[ ._](js) *(?:(?= \\$?\"{3})|$)",
-			"end": "(?<=\"{3})",
-			"beginCaptures": {
-				"1": {
-					"name": "variable.fsharp"
-				}
-			},
-			"patterns": [
-				{
-					"contentName": "meta.embedded.interpolated.js",
-					"begin": "\\$\"{3}",
-					"end": "\"{3}",
-					"patterns": [
-						{
-							"include": "source.js"
-						}
-					]
-				},
-				{
-					"contentName": "meta.embedded.string.js",
-					"begin": "\"{3}",
-					"end": "\"{3}",
-					"patterns": [
-						{
-							"include": "source.js"
-						}
-					]
-				},
-				{
-					"include": "source.fsharp"
-				}
-			]
-		}
-	]
+  "scopeName": "inline.template-fsharp-highlight",
+  "injectionSelector": "L:- (comment, string)",
+  "patterns": [
+    {
+      "include": "#lang_then_string"
+    },
+    {
+      "include": "#lang_then_newline"
+    }
+  ],
+  "repository": {
+    "lang_then_string": {
+      "contentName": "string.quoted.triple.template.${2:/downcase}.fsharp",
+      "begin": "(?xi)         # Ignore whitespace in regex and case in matches\n(?<=          # Start after valid lang ($2 above) with any prefix\n  (           # Optionally capture:\n    \\(\\*      # - Opening comment\n    \\ ?       # - Single optional space\n  )?\n  (html|svg|css|js|sql)\n  (?(1)       # If captured opening comment then match:\n    \\ ?       # - Single optional space\n    \\*\\)      # - Closing comment\n  |           # Else skip match\n  )\n)\n\\ *           # Match potentially 0-length spaces\n(?=\\$?\"\"\")    # End before triple quoted string\n",
+      "end": "$",
+      "patterns": [
+        {
+          "include": "#interpolated_string"
+        },
+        {
+          "include": "#triple_quoted_string"
+        }
+      ]
+    },
+    "lang_then_newline": {
+      "contentName": "string.quoted.triple.template.${1:/downcase}.fsharp",
+      "begin": "(?xi)\n(?<=\n  (\n    \\(\\*\n    \\ ?\n  )?\n  (html|svg|css|js|sql)\n  (?(1)\n    \\ ?\n    \\*\\)\n  |\n  )\n)\n\\ *\n$\n",
+      "applyEndPatternLast": true,
+      "end": "^",
+      "patterns": [
+        {
+          "include": "#newline_then_string"
+        }
+      ]
+    },
+    "newline_then_string": {
+      "begin": "(?x)\n^\n\\ *\n(?=\\$?\"\"\")\n",
+      "end": "$",
+      "patterns": [
+        {
+          "include": "#interpolated_string"
+        },
+        {
+          "include": "#triple_quoted_string"
+        }
+      ]
+    },
+    "triple_quoted_string": {
+      "contentName": "meta.embedded.line",
+      "begin": "\"\"\"",
+      "end": "\"\"\"",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.fsharp"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.fsharp"
+        }
+      }
+    },
+    "interpolated_string": {
+      "contentName": "meta.embedded.block",
+      "begin": "\\$\"\"\"",
+      "end": "\"\"\"",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.fsharp"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.fsharp"
+        }
+      }
+    }
+  }
 }

@@ -1,0 +1,92 @@
+scopeName: inline.template-fsharp-highlight
+injectionSelector: "L:- (comment, string)"
+patterns:
+  - include: "#lang_then_string"
+  - include: "#lang_then_newline"
+repository:
+  lang_then_string:
+    # name: DEBUG
+    # Documented at https://macromates.com/blog/2011/format-strings/#the-case-for-replacements
+    contentName: string.quoted.triple.template.${2:/downcase}.fsharp
+    begin: |
+      (?xi)         # Ignore whitespace in regex and case in matches
+      (?<=          # Start after valid lang ($2 above) with any prefix
+        (           # Optionally capture:
+          \(\*      # - Opening comment
+          \ ?       # - Single optional space
+        )?
+        (html|svg|css|js|sql)
+        (?(1)       # If captured opening comment then match:
+          \ ?       # - Single optional space
+          \*\)      # - Closing comment
+        |           # Else skip match
+        )
+      )
+      \ *           # Match potentially 0-length spaces
+      (?=\$?""")    # End before triple quoted string
+    # Match content until line end
+    end: $
+    patterns:
+      - include: "#interpolated_string"
+      - include: "#triple_quoted_string"
+  lang_then_newline:
+    # Related to microsoft/vscode-textmate#114
+    # Same as above but split between 2 patterns
+    # name: DEBUG.red
+    contentName: string.quoted.triple.template.${1:/downcase}.fsharp
+    begin: |
+      (?xi)
+      (?<=
+        (
+          \(\*
+          \ ?
+        )?
+        (html|svg|css|js|sql)
+        (?(1)
+          \ ?
+          \*\)
+        |
+        )
+      )
+      \ *
+      $
+    # From end position of subpatterns
+    applyEndPatternLast: true
+    # Stop matching at start position
+    end: ^
+    patterns:
+      - include: "#newline_then_string"
+  newline_then_string:
+    # name: DEBUG.orange
+    # From line start
+    begin: |
+      (?x)
+      ^
+      \ *
+      (?=\$?""")
+    end: $
+    patterns:
+      - include: "#interpolated_string"
+      - include: "#triple_quoted_string"
+  triple_quoted_string:
+    # name: DEBUG.green
+    contentName: meta.embedded.line
+    begin: |-
+      """
+    end: |-
+      """
+    beginCaptures:
+      0: { name: punctuation.definition.string.begin.fsharp }
+    endCaptures:
+      0: { name: punctuation.definition.string.end.fsharp }
+  interpolated_string:
+    # Same as above but variant scope for interpolation
+    # name: DEBUG.green
+    contentName: meta.embedded.block
+    begin: \$"""
+    end: |-
+      """
+    beginCaptures:
+      0: { name: punctuation.definition.string.begin.fsharp }
+    endCaptures:
+      0: { name: punctuation.definition.string.end.fsharp }
