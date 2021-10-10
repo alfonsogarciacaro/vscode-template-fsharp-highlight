@@ -3,7 +3,7 @@
 	"injectionSelector": "L:source.fsharp - (comment, string.quoted.double.fsharp, string.quoted.triple.fsharp)",
 	"patterns": [
 		{
-			"begin": "[ ._](html|svg) *(?:(?= \\$?\"{3})|$)",
+			"begin": "[ ._(](html|svg) *(?:(?= \\$?\"{3})|$)",
 			"end": "(?<=\"{3})",
 			"beginCaptures": {
 				"1": {
@@ -38,7 +38,7 @@
 			]
 		},
 		{
-			"begin": "[ ._](sql) *(?:(?= \\$?\"{3})|$)",
+			"begin": "[ ._(](sql) *(?:(?= \\$?\"{3})|$)",
 			"end": "(?<=\"{3})",
 			"beginCaptures": {
 				"1": {
@@ -72,7 +72,7 @@
 			]
 		},
 		{
-			"begin": "[ ._](css) *(?:(?= \\$?\"{3})|$)",
+			"begin": "[ ._(](css) *(?:(?= \\$?\"{3})|$)",
 			"end": "(?<=\"{3})",
 			"beginCaptures": {
 				"1": {
@@ -106,7 +106,7 @@
 			]
 		},
 		{
-			"begin": "[ ._](js) *(?:(?= \\$?\"{3})|$)",
+			"begin": "[ ._(](js) *(?:(?= \\$?\"{3})|$)",
 			"end": "(?<=\"{3})",
 			"beginCaptures": {
 				"1": {
