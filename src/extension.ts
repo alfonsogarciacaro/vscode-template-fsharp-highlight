@@ -1,3 +1,4 @@
+import { off } from 'process';
 import { commands, CompletionList, ExtensionContext, Hover, languages, Position, Range, Selection, SnippetString, TextDocument, TextEditor, TextEditorEdit, Uri, workspace } from 'vscode';
 
 function last<T>(xs: Iterable<T>): T | undefined {
@@ -90,21 +91,36 @@ function replaceNonNestedBracesWithWhitespace(text: string, braces?: Brace[]) {
 	}
 }
 
-/** startPattern must be a global RegExp */
 function tryVirtualContent({ text, offset, ignoreHoles = true }: { text: string, offset: number, ignoreHoles?: boolean } ): [string, string] | undefined {
-	const pattern = /[ ._](html|svg|sql|css|js)(\s+\$?""")(?:(?!""")[\s\S])+$/;
-	const endPattern = /"""/;
+	const pattern = /[ ._](html|svg|sql|css|js)\s+(\$?"+)/g;
 
-	const match = text.slice(0, offset).match(pattern);
+	// TODO: We could start closer to the current offset for better performance
+	const textSlice = text.slice(0, offset);
+	let match: RegExpMatchArray;
+	while (true) {
+		const m = pattern.exec(textSlice);
+		if (m == null) break;
+		match = m;
+	}
 	if (match == null) {
 		return;
 	}
-
+	
 	const virtualId = match[1];
-	const isInterpolated = match[2].endsWith('$"""');
-	const regionStart = match.index + 1 + match[1].length + match[2].length;
+	const isInterpolated = match[2].startsWith('$');
+	const quotes = isInterpolated ? match[2].slice(1) : match[2];
+	if (quotes.length !== 1 && quotes.length !== 3) {
+		return;
+	}
 
-	let holes;
+	const endPattern = quotes.length === 1 ? /(?!\\)"/ : /"""/;
+	const regionStart = match.index + match[0].length;
+	const endMatch = text.slice(regionStart).match(endPattern);
+	if (regionStart + endMatch.index <= offset) {
+		return;
+	}
+	
+	let holes: Brace[] | undefined;
 	if (isInterpolated && ignoreHoles) {
 		// Check we're not in a hole
 		holes = findNonNestedBraces({ text: text.slice(regionStart, offset), addLastNonClosedBraceIfAny: true });
@@ -113,7 +129,6 @@ function tryVirtualContent({ text, offset, ignoreHoles = true }: { text: string,
 		}
 	}
 
-	const endMatch = text.slice(regionStart).match(endPattern);
 	const regionEnd = endMatch ? regionStart + endMatch.index : text.length;
 
 	let regionContent = text.slice(regionStart, regionEnd);

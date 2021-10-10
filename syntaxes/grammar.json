@@ -31,9 +31,41 @@
 						}
 					]
 				},
-				
 				{
 					"include": "source.fsharp"
+				}
+			]
+		},
+		{
+			"begin": "[ ._(](html|svg) +\\$\"",
+			"end": "\"",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.interpolated.html",
+					"include": "text.html.derivative"
+				},
+				{
+					"include": "source.fsharp"
+				}
+			]
+		},
+		{
+			"begin": "[ ._(](html|svg) +\"",
+			"end": "\"",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.string.html",
+					"include": "text.html.derivative"
 				}
 			]
 		},
@@ -72,6 +104,39 @@
 			]
 		},
 		{
+			"begin": "[ ._(](sql) +\\$\"",
+			"end": "\"",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.interpolated.sql",
+					"include": "source.sql"
+				},
+				{
+					"include": "source.fsharp"
+				}
+			]
+		},
+		{
+			"begin": "[ ._(](sql) +\"",
+			"end": "\"",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.string.sql",
+					"include": "source.sql"
+				}
+			]
+		},
+		{
 			"begin": "[ ._(](css) *(?:(?= \\$?\"{3})|$)",
 			"end": "(?<=\"{3})",
 			"beginCaptures": {
@@ -106,6 +171,39 @@
 			]
 		},
 		{
+			"begin": "[ ._(](css) +\\$\"",
+			"end": "\"",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.interpolated.css",
+					"include": "source.css"
+				},
+				{
+					"include": "source.fsharp"
+				}
+			]
+		},
+		{
+			"begin": "[ ._(](css) +\"",
+			"end": "\"",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.string.css",
+					"include": "source.css"
+				}
+			]
+		},
+		{
 			"begin": "[ ._(](js) *(?:(?= \\$?\"{3})|$)",
 			"end": "(?<=\"{3})",
 			"beginCaptures": {
@@ -136,6 +234,39 @@
 				},
 				{
 					"include": "source.fsharp"
+				}
+			]
+		},
+		{
+			"begin": "[ ._(](js) +\\$\"",
+			"end": "\"",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.interpolated.js",
+					"include": "source.js"
+				},
+				{
+					"include": "source.fsharp"
+				}
+			]
+		},
+		{
+			"begin": "[ ._(](js) +\"",
+			"end": "\"",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.string.js",
+					"include": "source.js"
 				}
 			]
 		}
