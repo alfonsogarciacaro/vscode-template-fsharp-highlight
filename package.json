@@ -24,32 +24,11 @@
 	],  
   "main": "./out/extension",
   "contributes": {
-    "commands": [
-      {
-        "command": "template.fsharp.addComment",
-        "title": "F#: Add template comment"
-      },
-      {
-        "command": "template.fsharp.removeComment",
-        "title": "F#: Remove template comment"
-      }
-    ],
-    "keybindings": [
-			{
-				"command": "template.fsharp.addComment",
-				"key": "ctrl+shift+k ctrl+shift+c",
-				"when": "editorFocus && editorLangId == 'fsharp'"
-			},
-			{
-				"command": "template.fsharp.removeComment",
-				"key": "ctrl+shift+k ctrl+shift+u",
-				"when": "editorFocus && editorLangId == 'fsharp'"
-			}
-    ],
     "grammars": [
       {
         "injectTo": [
-          "source.fsharp"
+          "source.fsharp",
+          "source.fsharp.fsl"
         ],
         "scopeName": "template.fsharp.injection",
         "path": "./syntaxes/grammar.json",
