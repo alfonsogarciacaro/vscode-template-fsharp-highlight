@@ -37,10 +37,10 @@
           "meta.embedded.string.sql": "sql",
           "meta.embedded.string.css": "css",
           "meta.embedded.string.js": "js",
+          "meta.embedded.string.python": "python",
           "meta.embedded.interpolated.html": "html",
           "meta.embedded.interpolated.sql": "sql",
-          "meta.embedded.interpolated.css": "css",
-          "meta.embedded.interpolated.js": "js"
+          "meta.embedded.interpolated.css": "css"
         }
       },
       {

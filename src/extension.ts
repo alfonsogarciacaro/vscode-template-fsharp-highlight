@@ -1,4 +1,3 @@
-import { off } from 'process';
 import { commands, CompletionList, ExtensionContext, Hover, languages, Position, Range, Selection, SnippetString, TextDocument, TextEditor, TextEditorEdit, Uri, workspace } from 'vscode';
 
 function last<T>(xs: Iterable<T>): T | undefined {
@@ -92,7 +91,7 @@ function replaceNonNestedBracesWithWhitespace(text: string, braces?: Brace[]) {
 }
 
 function tryVirtualContent({ text, offset, ignoreHoles = true }: { text: string, offset: number, ignoreHoles?: boolean } ): [string, string] | undefined {
-	const pattern = /[ ._](html|svg|sql|css|js)\s+(\$?"+)/g;
+	const pattern = /[ ._](html|svg|sql|css|js|python)\s+(\$?"+)/g;
 
 	// TODO: We could start closer to the current offset for better performance
 	const textSlice = text.slice(0, offset);
@@ -153,19 +152,17 @@ function tryVirtualContent({ text, offset, ignoreHoles = true }: { text: string,
 	return [virtualId, virtualContent];
 }
 
-function getCommentMarks(virtualId: string): [start: string, end?: string] | undefined {
+function getFileExtension(virtualId: string): string {
 	switch (virtualId) {
-		case "html":
-		case "svg":
-			return ["<!--", "-->"];
-		case "css":
-			return ["/*", "*/"];
-		case "sql":
-			return ["--"];
-		case "js":
-			return ["//"];
+		case "python":
+			return "py:"
+		// case "html":
+		// case "svg":
+		// case "css":
+		// case "sql":
+		// case "js":
 		default:
-			return;
+			return virtualId;
 	}
 }
 
@@ -218,7 +215,7 @@ export function activate(context: ExtensionContext) {
 							}
 							break;
 						case ".":
-							if (virtualId !== "js") {
+							if (!(virtualId === "js" || virtualId === "python")) {
 								return;
 							}
 							break;
@@ -278,7 +275,7 @@ export function activate(context: ExtensionContext) {
 					const originalUri = document.uri.toString();
 					const vdocUriString = `embedded-content://${virtualId}/${encodeURIComponent(
 						originalUri
-					)}.${virtualId}`;
+					)}.${getFileExtension(virtualId)}`;
 
 					virtualDocumentContents.set(originalUri, virtualContent);
 					const vdocUri = Uri.parse(vdocUriString);
