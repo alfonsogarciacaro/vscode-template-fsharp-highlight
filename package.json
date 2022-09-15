@@ -1,6 +1,6 @@
 {
   "name": "vscode-template-fsharp-highlight",
-  "displayName": "Highlight HTML/SQL templates in F#",
+  "displayName": "Highlight templates in F#",
   "description": "Syntax highlighting for template strings in F#",
   "icon": "fsharp.png",
   "version": "1.5.0",
@@ -20,10 +20,17 @@
   ],
 	"activationEvents": [
 		"onLanguage:fsharp",
-    "onCommand:template.fsharp.comment"
+    "onCommand:fablePython.runcurrentcell"
 	],  
   "main": "./out/extension",
   "contributes": {
+    "commands": [
+      {
+        "command": "fablePython.runcurrentcell",
+        "title": "Fable Python: Run Current Cell",
+        "when": "editorLangId == fsharp"
+      }
+    ],    
     "grammars": [
       {
         "injectTo": [
