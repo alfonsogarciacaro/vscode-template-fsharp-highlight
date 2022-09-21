@@ -239,7 +239,7 @@
 				{
 					"contentName": "meta.embedded.string.python",
 					"begin": "\"{3}",
-					"end": "\"{3}",
+					"end": " *\"{3}",
 					"patterns": [
 						{
 							"include": "source.python"
