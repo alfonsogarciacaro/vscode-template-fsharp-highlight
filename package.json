@@ -3,7 +3,7 @@
   "displayName": "Highlight templates in F#",
   "description": "Syntax highlighting for template strings in F#",
   "icon": "fsharp.png",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "publisher": "alfonsogarciacaro",  
   "license": "MIT",
   "repository": {
@@ -19,18 +19,10 @@
     "Other"
   ],
 	"activationEvents": [
-		"onLanguage:fsharp",
-    "onCommand:fablePython.runcurrentcell"
+		"onLanguage:fsharp"
 	],  
   "main": "./out/extension",
   "contributes": {
-    "commands": [
-      {
-        "command": "fablePython.runcurrentcell",
-        "title": "Fable Python: Run Current Cell",
-        "when": "editorLangId == fsharp"
-      }
-    ],    
     "grammars": [
       {
         "injectTo": [

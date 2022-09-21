@@ -1,12 +1,12 @@
 # Syntax highlighting for template strings in F#
 
-VS Code extension that highlights HTML/SVG/CSS/SQL/JS F# triple quoted strings (interpolated or not) preceded by a function named `html/svg/css/sql/js`.
+VS Code extension that highlights HTML/SVG/CSS/SQL/JS/Python F# triple quoted strings (interpolated or not) preceded by a function named `html/svg/css/sql/js/python`.
 
 ```fsharp
 html """<h1>Hello World!</h1>"""
 ```
 
-You need to declare the functions by yourself. If you need to do some transformation, make the function accept `FormattableString`:
+You need to declare the functions by yourself in a module with `RequireQualifiedAccess` attribute. If you need to do some transformation, make the function accept `FormattableString`:
 
 ```fsharp
 let sql (s: FormattableString) = ...
