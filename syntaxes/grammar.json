@@ -204,7 +204,7 @@
 			]
 		},
 		{
-			"begin": "[ ._(](js) *(?:(?= \"{3})|$)",
+			"begin": "[ ._(](js) *(?:(?= \\$?\"{3})|$)",
 			"end": "(?<=\"{3})",
 			"beginCaptures": {
 				"1": {
@@ -212,6 +212,16 @@
 				}
 			},
 			"patterns": [
+				{
+					"contentName": "meta.embedded.interpolated.js",
+					"begin": "\\$\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "source.js"
+						}
+					]
+				},
 				{
 					"contentName": "meta.embedded.string.js",
 					"begin": "\"{3}",
@@ -228,7 +238,7 @@
 			]
 		},
 		{
-			"begin": "[ ._(](python) *(?:(?= \"{3})|$)",
+			"begin": "[ ._(](python) *(?:(?= \\$?\"{3})|$)",
 			"end": "(?<=\"{3})",
 			"beginCaptures": {
 				"1": {
@@ -236,6 +246,16 @@
 				}
 			},
 			"patterns": [
+				{
+					"contentName": "meta.embedded.interpolated.python",
+					"begin": "\\$\"{3}",
+					"end": " *\"{3}",
+					"patterns": [
+						{
+							"include": "source.python"
+						}
+					]
+				},
 				{
 					"contentName": "meta.embedded.string.python",
 					"begin": "\"{3}",

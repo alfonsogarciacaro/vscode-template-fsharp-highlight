@@ -1,6 +1,6 @@
 {
 	"scopeName": "template.fsharp.reinjection",
-	"injectionSelector": "L:source.fsharp (meta.embedded.interpolated.html, meta.embedded.interpolated.sql, meta.embedded.interpolated.css) - meta.embedded.interpolated.substitution",
+	"injectionSelector": "L:source.fsharp (meta.embedded.interpolated.html, meta.embedded.interpolated.sql, meta.embedded.interpolated.css, , meta.embedded.interpolated.js, meta.embedded.interpolated.python) - meta.embedded.interpolated.substitution",
 	"patterns": [
 		{
 			"contentName": "meta.embedded.interpolated.substitution",
