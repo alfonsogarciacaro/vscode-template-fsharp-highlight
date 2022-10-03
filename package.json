@@ -3,7 +3,7 @@
   "displayName": "Highlight templates in F#",
   "description": "Syntax highlighting for template strings in F#",
   "icon": "fsharp.png",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "publisher": "alfonsogarciacaro",  
   "license": "MIT",
   "repository": {
@@ -35,11 +35,15 @@
           "meta.embedded.string.html": "html",
           "meta.embedded.string.sql": "sql",
           "meta.embedded.string.css": "css",
-          "meta.embedded.string.js": "js",
+          "meta.embedded.string.js": "javascript",
+          "meta.embedded.string.jsx": "jsx-tags",
           "meta.embedded.string.python": "python",
           "meta.embedded.interpolated.html": "html",
           "meta.embedded.interpolated.sql": "sql",
-          "meta.embedded.interpolated.css": "css"
+          "meta.embedded.interpolated.css": "css",
+          "meta.embedded.interpolated.js": "javascript",
+          "meta.embedded.interpolated.jsx": "jsx-tags",
+          "meta.embedded.interpolated.python": "python"
         }
       },
       {

@@ -105,7 +105,7 @@ function replaceNonNestedBracesWithWhitespace(text: string, braces?: Brace[]) {
 
 
 function tryVirtualContent({ text, offset, ignoreHoles = true }: { text: string, offset: number, ignoreHoles?: boolean } ): [string, string] | undefined {
-	const pattern = /[ ._](html|svg|sql|css|js|python)\s+(\$?"+)/g;
+	const pattern = /[ ._](html|svg|sql|css|jsx|python)\s+(\$?"+)/g;
 
 	function parseEmbeddedRegion(match: RegExpMatchArray, mustBeCurrent = false) {
 		const virtualId = match[1];
@@ -227,8 +227,15 @@ class TextProvider implements TextDocumentContentProvider {
 			// case "css":
 			// case "sql":
 			// case "js":
+			// case "jsx":
 			default:
-				return `embedded-content://${virtualId}/${encodeURIComponent(originalUri)}.${virtualId}`;
+				let languageId = virtualId;
+				if (virtualId === "js") {
+					languageId = "javascript";
+				} else if (virtualId === "jsx") {
+					languageId = "jsx-tags"
+				}
+				return `embedded-content://${languageId}/${encodeURIComponent(originalUri)}.${virtualId}`;
 		}
 	}
 
@@ -257,13 +264,14 @@ export function activate(context: ExtensionContext) {
 					const [virtualId, virtualContent] = virtual;
 					switch (context.triggerCharacter) {
 						case "<":
+						case ">":
 						case "/":
-							if (!(virtualId === "html" || virtualId === "svg")) {
+							if (!(virtualId === "html" || virtualId === "svg" || virtualId === "jsx")) {
 								return;
 							}
 							break;
 						case ".":
-							if (!(virtualId === "js" || virtualId === "python")) {
+							if (!(virtualId === "js" || virtualId === "jsx" || virtualId === "python")) {
 								return;
 							}
 							break;
@@ -272,12 +280,16 @@ export function activate(context: ExtensionContext) {
 					// Auto-closing tags is not working so try to provide our own
 					if (context.triggerCharacter === ">") {
 						if (documentText[documentOffset - 2] !== "/") {
-							const tagMatch = last(virtualContent.slice(0, documentOffset).matchAll(/<\/?([\w-]+)/g));
+							const tagMatch = last(virtualContent.slice(0, documentOffset).matchAll(/<\/?([\w-]*)/g));
 							if (tagMatch && tagMatch[0][1] !== "/") {
 								const tag = tagMatch[1];
-								// TODO: complete this list
-								const noClosingTags = ["area", "br", "col", "hr", "img", "input", "link"];
-								if (noClosingTags.indexOf(tag) === -1) {
+								let isNoClosingTag = false;
+								if (virtualId === "html") {
+									// TODO: complete this list
+									const noClosingTags = ["area", "br", "col", "hr", "img", "input", "link"];
+									isNoClosingTag = noClosingTags.indexOf(tag) >= 0;
+								}
+								if (!isNoClosingTag) {
 									return new CompletionList([{
 										label: `</${tag}>`,
 										insertText: new SnippetString(`$0</${tag}>`,)
@@ -300,7 +312,7 @@ export function activate(context: ExtensionContext) {
 				}
 			}
 		},
-		">", "/", "."
+		"<", ">", "/", "."
 	)
 
 	languages.registerHoverProvider(

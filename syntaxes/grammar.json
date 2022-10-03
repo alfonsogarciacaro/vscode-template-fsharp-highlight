@@ -238,6 +238,40 @@
 			]
 		},
 		{
+			"begin": "[ ._(](jsx) *(?:(?= \\$?\"{3})|$)",
+			"end": "(?<=\"{3})",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.fsharp"
+				}
+			},
+			"patterns": [
+				{
+					"contentName": "meta.embedded.interpolated.jsx",
+					"begin": "\\$\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "source.js.jsx"
+						}
+					]
+				},
+				{
+					"contentName": "meta.embedded.string.jsx",
+					"begin": "\"{3}",
+					"end": "\"{3}",
+					"patterns": [
+						{
+							"include": "source.js.jsx"
+						}
+					]
+				},
+				{
+					"include": "source.fsharp"
+				}
+			]
+		},
+		{
 			"begin": "[ ._(](python) *(?:(?= \\$?\"{3})|$)",
 			"end": "(?<=\"{3})",
 			"beginCaptures": {
